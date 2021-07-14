@@ -16,7 +16,7 @@ exports.createProduct = async (req, res) => {
             });
         }
         isSuccess = true;
-        status = 200;
+        status = 201;
         data = newProduct;
         res.status(status).json({
             isSuccess: isSuccess,

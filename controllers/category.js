@@ -37,7 +37,7 @@ exports.createCategory = async (req, res) => {
     }
 };
 
-//fetch all the products
+//fetch all the categories
 exports.listCategories = async (req, res) => {
     let isSuccess, data, message, status;
     try {
