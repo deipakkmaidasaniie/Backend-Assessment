@@ -7,4 +7,5 @@ app.get("/products-list", productController.listProducts);
 app.get("/find-product/:id",productController.findProduct);
 app.delete("/delete-product/:id",productController.deleteProduct);
 app.patch("/update-product/:id",productController.updateProduct);
+app.get("/fetch-products/:id",productController.fetchProductByCategory);
 module.exports=app;

@@ -25,7 +25,6 @@ exports.createProduct = async (req, res) => {
             message: "Product added successfully",
         });
     } catch (err) {
-        console.log(err);
         isSuccess = false;
         status = 500;
         res.status(status).json({
@@ -41,7 +40,10 @@ exports.createProduct = async (req, res) => {
 exports.listProducts = async (req, res) => {
     let isSuccess, data, message, status;
     try {
-        let products = await Product.find().populate('categoryId','categoryName');
+        let products = await Product.find().populate(
+            "categoryId",
+            "categoryName"
+        );
         if (products.length == 0) {
             isSuccess = false;
             status = 403;
@@ -62,7 +64,6 @@ exports.listProducts = async (req, res) => {
             message: message,
         });
     } catch (err) {
-        console.log(err);
         isSuccess = false;
         status = 500;
         res.status(status).json({
@@ -89,7 +90,10 @@ exports.findProduct = async (req, res) => {
         }
         let productid = req.params.id;
         productid = +productid; // converting into number
-        const product=await Product.findById(productid).populate('categoryId','categoryName');
+        const product = await Product.findById(productid).populate(
+            "categoryId",
+            "categoryName"
+        );
         if (!product) {
             isSuccess = false;
             status = 404;
@@ -111,7 +115,6 @@ exports.findProduct = async (req, res) => {
             message: message,
         });
     } catch (err) {
-        console.log(err);
         isSuccess = false;
         status = 500;
         res.status(status).json({
@@ -122,7 +125,6 @@ exports.findProduct = async (req, res) => {
         });
     }
 };
-
 
 // delete a product with its product id
 
@@ -162,7 +164,6 @@ exports.deleteProduct = async (req, res) => {
             message: message,
         });
     } catch (err) {
-        console.log(err);
         isSuccess = false;
         status = 500;
         res.status(status).json({
@@ -174,7 +175,7 @@ exports.deleteProduct = async (req, res) => {
     }
 };
 
-//update product
+//update a product
 exports.updateProduct = async (req, res) => {
     let isSuccess, data, message, status;
     try {
@@ -189,9 +190,13 @@ exports.updateProduct = async (req, res) => {
         }
         let productid = req.params.id;
         productid = +productid; // converting into number
-        const product=await Product.findOneAndUpdate({_id:productid},req.body,{
-            new:true
-        });
+        const product = await Product.findOneAndUpdate(
+            { _id: productid },
+            req.body,
+            {
+                new: true,
+            }
+        );
         if (!product) {
             isSuccess = false;
             status = 404;
@@ -213,7 +218,6 @@ exports.updateProduct = async (req, res) => {
             message: message,
         });
     } catch (err) {
-        console.log(err);
         isSuccess = false;
         status = 500;
         res.status(status).json({
@@ -221,6 +225,69 @@ exports.updateProduct = async (req, res) => {
             status: status,
             message:
                 "Error in updating product due to internal server error. Please try again later",
+        });
+    }
+};
+
+// fetch all the products by category Id and also list category details
+
+exports.fetchProductByCategory = async (req, res) => {
+    let isSuccess, data, message, status;
+    try {
+        if (!req.params.id) {
+            isSuccess = false;
+            status = 404;
+            res.status(status).json({
+                isSuccess: isSuccess,
+                status: status,
+                message: "Please enter the category id to fetch products",
+            });
+        }
+        let categoryId = req.params.id;
+        categoryId = +categoryId;
+        let products = await Product.aggregate([
+            {
+                $match: {
+                    categoryId: categoryId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "categoryData",
+                },
+            },
+        ]);
+        if (products.length == 0) {
+            isSuccess = false;
+            status = 404;
+            res.status(status).json({
+                isSuccess: isSuccess,
+                status: status,
+                message:
+                    "Products doesn't exists for the given category id. Please enter valid category id.",
+            });
+        }
+        isSuccess = true;
+        data = products;
+        status = 200;
+        message = "products fetched";
+        res.status(status).json({
+            isSuccess: isSuccess,
+            products: data,
+            status: status,
+            message: message,
+        });
+    } catch (err) {
+        isSuccess = false;
+        status = 500;
+        res.status(status).json({
+            isSuccess: isSuccess,
+            status: status,
+            message:
+                "Error in fetching products due to internal server error. Please try again later",
         });
     }
 };
